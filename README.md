@@ -14,7 +14,6 @@ A simple, modern weather application that:
 
 ##  Demo Screenshot
 
-> (Add screenshot here once deployed)
 > Example:
 
 > <img width="1323" height="679" alt="Screenshot (21)" src="https://github.com/user-attachments/assets/29f58f5b-0890-48f5-b04c-ae969dedf738" />
