@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Smart Weather</title>
+
+<style>
+  *{box-sizing:border-box;}
+  body{
+    font-family: 'Segoe UI', Arial;
+    margin:0;
+    background:linear-gradient(145deg,#0f172a,#1e3a8a,#22c55e);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+  }
+  .app{
+    width:380px;
+    background:#020617d9;
+    border-radius:20px;
+    padding:25px 25px 30px;
+    box-shadow:0 15px 50px rgba(0,0,0,.4);
+    backdrop-filter: blur(6px);
+  }
+  h1{margin:0 0 15px;font-weight:700;}
+  .subtitle{opacity:.8;margin-bottom:15px;font-size:14px;}
+  input{
+    width:100%;padding:10px 14px;border-radius:12px;border:none;
+    outline:none;font-size:14px;
+  }
+  button{
+    margin-top:12px;width:100%;padding:12px;border-radius:12px;
+    border:none;font-weight:700;background:#38bdf8;color:#020617;
+    cursor:pointer;transition:.2s;
+  }
+  button:hover{transform:translateY(-1px);background:#7dd3fc;}
+  .card{
+    margin-top:18px;background:#030712;border-radius:14px;padding:15px;
+  }
+  .row{display:flex;justify-content:space-between;margin:6px 0;}
+  .ai{
+    margin-top:14px;background:#020617;border-radius:12px;padding:10px;
+    font-size:13px;line-height:1.4;
+  }
+  .fade{animation:fade .6s ease;}
+  @keyframes fade{from{opacity:.1;transform:translateY(4px);}to{opacity:1;transform:none;}}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h1>🌤️ Smart Weather</h1>
+  <div class="subtitle" id="locationInfo">Detecting your city…</div>
+
+  <input id="city" placeholder="Search city (e.g. Bengaluru)" />
+  <button onclick="getWeather()">Get Weather</button>
+
+  <div class="card fade" id="result"></div>
+  <div class="ai fade" id="ai"></div>
+</div>
+
+<script>
+const API_KEY = "YOUR_API_KEY_HERE"; // <-- OpenWeatherMap key
+
+// auto-detect city via IP
+async function detectCity() {
+  try {
+    const r = await fetch("https://ipapi.co/json/"); // free lookup
+    const data = await r.json();
+    if (data && data.city) {
+      document.getElementById("city").value = data.city;
+      document.getElementById("locationInfo").innerText =
+        "📍 Detected location: " + data.city + ", " + data.country_name;
+      getWeather();
+    } else {
+      document.getElementById("locationInfo").innerText =
+        "Type a city to get started.";
+    }
+  } catch (e) {
+    document.getElementById("locationInfo").innerText =
+      "Couldn’t auto-detect location. Type city manually.";
+  }
+}
+
+async function getWeather() {
+  const city = document.getElementById("city").value.trim();
+  if (!city) return alert("Please enter city name");
+
+  const res = await fetch(
+    `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`
+  );
+  const data = await res.json();
+
+  if (data.cod !== 200) {
+    document.getElementById("result").innerHTML = " City not found";
+    document.getElementById("ai").innerHTML = "";
+    return;
+  }
+
+  const temp = Math.round(data.main.temp);
+  const feels = Math.round(data.main.feels_like);
+  const desc = data.weather[0].description;
+  const icon = data.weather[0].icon;
+
+  document.getElementById("result").innerHTML = `
+    <div class="row">
+      <div><b>${data.name}, ${data.sys.country}</b></div>
+      <div>${new Date().toLocaleTimeString()}</div>
+    </div>
+    <div class="row">
+      <div>🌡️ Temp:</div><div><b>${temp}°C</b></div>
+    </div>
+    <div class="row">
+      <div>🤔 Feels like:</div><div>${feels}°C</div>
+    </div>
+    <div class="row">
+      <div>☁️ Condition:</div><div>${desc}</div>
+    </div>
+    <div style="text-align:center;margin-top:8px;">
+      <img src="https://openweathermap.org/img/wn/${icon}@2x.png" />
+    </div>
+  `;
+
+  // “AI-like” guidance
+  let advice = "";
+
+  if (temp >= 34) advice = "🔥 Very hot — drink water, avoid harsh sunlight.";
+  else if (temp >= 26) advice = "😎 Warm & pleasant — great outdoor weather.";
+  else if (temp >= 18) advice = "🙂 Mild — carry a light jacket.";
+  else if (temp >= 10) advice = "🧥 Cool — sweater recommended.";
+  else advice = "🥶 Cold — wear layers and stay warm.";
+
+  if (desc.includes("rain")) advice += " ☔ Could rain, carry umbrella.";
+  if (desc.includes("cloud")) advice += " ☁ Expect cloudy skies.";
+  if (desc.includes("snow")) advice += " ❄ Be careful on roads.";
+
+  document.getElementById("ai").innerHTML =
+    `<b>AI Suggestion:</b><br>${advice}`;
+}
+
+detectCity();
+</script>
+
+</body>
+</html>
