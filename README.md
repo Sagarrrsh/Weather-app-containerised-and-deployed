@@ -16,7 +16,7 @@ A simple, modern weather application that:
 
 > (Add screenshot here once deployed)
 > Example:
-> ![Weather App Screenshot](./screenshot.png)
+
 > <img width="1323" height="679" alt="Screenshot (21)" src="https://github.com/user-attachments/assets/29f58f5b-0890-48f5-b04c-ae969dedf738" />
 
 
